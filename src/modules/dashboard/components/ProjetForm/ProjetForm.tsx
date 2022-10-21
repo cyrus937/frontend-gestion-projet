@@ -4,20 +4,16 @@ import {
     Box,
     Button,
     Chip,
-    IconButton,
-    InputAdornment,
     MenuItem,
     OutlinedInput,
     Select,
-    SelectChangeEvent,
     TextField,
 } from '@mui/material'
-import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
-import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Projet } from '../../../../entities/Projet'
 import { User } from '../../../../entities/User'
+import { UserStateType } from '../../../../redux/userStore/reducer'
 import { BackdropLoader } from '../../../shared/Backdrop'
 import { Notification, NotifType } from '../../../shared/Notification'
 import { createProjet, getUser } from '../../network'
@@ -27,12 +23,6 @@ const Container = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-`
-
-const Line = styled.div`
-  height: 127px;
-  margin-right: 10px;
-  margin-left: 10px;
 `
 
 const Container1 = styled.div`
@@ -48,7 +38,6 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
     },
   },
 };
@@ -56,37 +45,49 @@ const MenuProps = {
 export const ProjetForm = ({
     saveProjet,
     closeModal,
+    proj,
 }: {
     saveProjet: (ex: Projet) => void
     closeModal?: () => void
+    proj?: Projet
 }) => {
     const [loading, setLoading] = useState(false)
     const [response, setResponse] = useState<NotifType>()
+    const connectedUser: UserStateType = useSelector(
+        (state: any) => state.userReducer,
+      ).user
+
+    const [r, setR] = useState<User[]>([])
+    let usr = {
+        id: connectedUser.id,
+        last_name: connectedUser.last_name,
+        first_name: connectedUser.first_name,
+        phone_number: connectedUser.phone_number,
+        sex: connectedUser.sex,
+        poste: connectedUser.poste,
+        year_of_birth: connectedUser.year_of_birth,
+        email: connectedUser.email,
+        username: connectedUser.username,
+        password: connectedUser.password,
+        admin: connectedUser.admin,
+        dateCreation: connectedUser.dateCreation,
+    }
 
     const defaultValue = {
         nom: '',
         description: '',
         state: 'PROPOSE',
-        collaborateur: [],
-        auteur: null,
+        collaborateur: r,
+        dateCreation: new Date(),
+        auteur: usr,
     }
 
     const [formValues, setFormValues] = useState(defaultValue)
 
     const [users, setUsers] = useState<User[]>([])
-    const [name, setName] = useState<string[]>([])
 
-    const [personName, setPersonName] = useState<string[]>([]);
+    const [personName, setPersonName] = useState<any[]>([]);
 
-    const handleChange1 = (event: SelectChangeEvent<typeof personName>) => {
-        const {
-            target: { value },
-        } = event;
-        setPersonName(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
-    };
 
     useEffect(() => {
         getUser().then((users) => {
@@ -98,11 +99,10 @@ export const ProjetForm = ({
     const handleSubmit = async (event: any) => {
         setLoading(true)
         event.preventDefault()
-
         await createProjet(formValues)
             .then((projet) => {
                 console.log('then -> ', projet)
-                saveProjet(projet.User)
+                saveProjet(projet)
                 setResponse({ type: 'success', message: 'Saved with success' })
                 setLoading(false)
                 closeModal?.()
@@ -116,7 +116,16 @@ export const ProjetForm = ({
 
     const handleChange = (event: any) => {
         const { name, value } = event.target
-        setFormValues({ ...formValues, [name]: value })
+        if (name === "collaborateur"){
+            setFormValues({...formValues, [name]: users.filter((item, index) => index in value)})
+            setPersonName(
+                // On autofill we get a stringified value.
+                typeof value === 'string' ? value.split(',') : value,
+              );
+        }
+        else{
+            setFormValues({ ...formValues, [name]: value })
+        }
     }
 
     return (
@@ -144,56 +153,38 @@ export const ProjetForm = ({
                                 value={formValues.description}
                                 onChange={handleChange}
                                 size='small'
-                            />
-                        </Container1>
-
-                        <Line></Line>
-
-                        <Container1>
+                            />        
                             <Select
+                                size='small'
                                 labelId="demo-multiple-chip-label"
                                 id="demo-multiple-chip"
+                                label='Collaborateurs'
+                                name='collaborateur'
                                 multiple
+                                placeholder='Collaborateurs'
+                                style={{width:300}}
                                 value={personName}
-                                onChange={handleChange1}
-                                input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                                onChange={handleChange}
+                                input={<OutlinedInput id="select-multiple-chip" label="Collaborateurs" />}
                                 renderValue={(selected) => (
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {selected.map((value) => (
-                                            <Chip key={value} label={value} />
+                                            <Chip key={value} label={users[Number(value)].first_name + " " + users[Number(value)].last_name} />
                                         ))}
                                     </Box>
                                 )}
                                 MenuProps={MenuProps}
                             >
-                                {name.map((n) => (
+                                {users.map((user, index) => (
 
                                     <MenuItem
-                                        key={n}
-                                        value={n}
+                                        key={index.toString()}
+                                        value={index}
                                     >
-                                        {n}
+                                        {user.first_name + " " + user.last_name}
                                     </MenuItem>
                                 ))}
                             </Select>
-                            {/* <TextField
-                                required
-                                label='Speciality'
-                                name='specialty'
-                                fullWidth
-                                select
-                                margin='dense'
-                                value={formValues.collaborateur}
-                                onChange={handleChange}
-                                size='small'
-                            >
-                                {users.map((val) => (
-                                    <MenuItem key={val.id} value={val}>
-                                        {val.first_name + " " + val.first_name}
-                                    </MenuItem>
-                                ))}
-                            </TextField> */}
-
                             <Button
                                 variant='outlined'
                                 fullWidth
@@ -203,11 +194,10 @@ export const ProjetForm = ({
                             >
                                 Enregistrer
                             </Button>
-                        </Container1>
-                    </Container>
+                            </Container1>
+                        </Container>
                 </Container1>
             </form>
-
             <Notification notif={response} />
             <BackdropLoader loading={loading} />
         </Container>

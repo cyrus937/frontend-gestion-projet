@@ -130,6 +130,7 @@ export const RegistrationPage = () => {
             email: resp.email,
             sex: resp.sex,
             username: resp.username,
+            year_of_birth: resp.year_of_birth,
             admin: resp.admin,
             poste: resp.poste,
             password: resp.password,

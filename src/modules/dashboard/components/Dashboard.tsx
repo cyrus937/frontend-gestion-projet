@@ -151,7 +151,7 @@ import {
                     {connectedUser.username}
                   </Typography>
                   <Typography variant='caption'>
-                    if({connectedUser.admin}){"ADMINISTRATEUR"}else{"UTILISATEUR"}
+                    {connectedUser.admin === true ? "ADMINISTRATEUR" : "UTILISATEUR"}
                   </Typography>
                 </div>
               </div>

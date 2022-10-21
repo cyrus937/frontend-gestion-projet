@@ -13,6 +13,7 @@ export const createUser = (user: UserStateType): UserTypeAction => ({
     phone_number: user.phone_number,
     email: user.email,
     sex: user.sex,
+    year_of_birth: user.year_of_birth,
     username: user.username,
     admin: user.admin,
     poste: user.poste,

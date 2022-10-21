@@ -7,5 +7,5 @@ export type Projet = {
     state: string
     collaborateur: User[]
     auteur: User
-    dateCreation: string
+    dateCreation: Date
 }

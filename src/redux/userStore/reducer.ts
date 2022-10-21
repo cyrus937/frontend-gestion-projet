@@ -10,6 +10,7 @@ export type UserStateType = {
   email: string
   sex: string
   username: string
+  year_of_birth: string
   admin: boolean
   password:string
   poste: string
@@ -24,6 +25,7 @@ const INITIAL_STORE: UserStateType = {
   email: '',
   sex: '',
   username: '',
+  year_of_birth: '',
   admin: false,
   poste: '',
   password: '',

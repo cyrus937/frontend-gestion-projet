@@ -27,7 +27,7 @@ export const ProjetTable = () => {
   const router = useNavigate()
   const [projets, setProjets] = useState<Projet[]>([])
   const [loading, setLoading] = useState(true)
-  const [exp, setProj] = useState<Projet>()
+  const [proj, setProj] = useState<Projet>()
 
   useEffect(() => {
     getProjets().then((projets) => {
@@ -35,6 +35,13 @@ export const ProjetTable = () => {
       setLoading(false)
     })
   }, [])
+
+  useEffect(() => {
+    if (proj) {
+      setProjets([...projets, proj])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proj])
 
   const columns = [
     {
@@ -56,6 +63,11 @@ export const ProjetTable = () => {
       field: 'auteur',
       headerName: 'Auteur',
       flex: 1,
+      valueGetter: function getDate(
+        params: GridValueGetterParams<any, Projet>,
+      ) {
+        return params.row.auteur.first_name + " " + params.row.auteur.last_name
+      },
     },
     {
       field: 'dateCreation',
@@ -78,7 +90,7 @@ export const ProjetTable = () => {
             label='Detail'
             color='info'
             onClick={() =>
-              router(ROUTES.EXPERT.DETAIL_CASE, { state: params.row })
+              router(ROUTES.PROJET.DETAIL, { state: params.row })
             }
           />
         </Tooltip>,
@@ -86,9 +98,9 @@ export const ProjetTable = () => {
         <GridActionsCellItem
           icon={<ChangeCircleOutlined />}
           label='Changer Etat'
-          color='info'
+          color='success'
           onClick={() =>
-            router(ROUTES.EXPERT.DETAIL_CASE, { state: params.row })
+            router(ROUTES.PROJET.DETAIL, { state: params.row })
           }
         />
       </Tooltip>,
@@ -101,24 +113,15 @@ export const ProjetTable = () => {
       <Typography component='h2' variant='h6' color='primary' gutterBottom>
         Projets
       </Typography>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom:20, marginTop:-10 }}>
 
       <ButtonWithModal title={'Nouveau Projet'} buttonText={'Nouveau Projet'}>
             {(closeModal) => (
-              <div style={{ width: 650 }}>
+              <div style={{ width: 350 }}>
                 <ProjetForm closeModal={closeModal} saveProjet={setProj} />
               </div>
             )}
           </ButtonWithModal>
-
-        {/* <Button
-          variant='contained'
-          startIcon={<Add />}
-          onClick={() => router(ROUTES.DASHBOARD)}
-          sx={{ marginBottom: 2 }}
-        >
-          Nouveau Projet
-        </Button> */}
       </div>
 
       <DataGrid

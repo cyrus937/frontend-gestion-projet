@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:8080/'
+export const BASE_URL = ""
 
 export const API_ROUTES = {
   LOGIN: `${BASE_URL}user/login/`,
